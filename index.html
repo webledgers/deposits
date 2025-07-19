@@ -8,7 +8,7 @@
     <script class="remove">
       var respecConfig = {
         specStatus: 'CG-DRAFT',
-        shortName: 'webledgers-det-v1',
+        publishDate: '2025-07-20',
         editors: [
           {
             name: 'Melvin Carvalho',
@@ -17,10 +17,26 @@
             companyURL: 'https://melvincarvalho.com/#me'
           }
         ],
-        publishDate: '2025-07-20',
+        authors: [
+          {
+            name: 'Melvin Carvalho',
+            url: 'https://melvincarvalho.com/#me',
+            company: 'Independent',
+            companyURL: 'https://melvincarvalho.com/#me'
+          }
+        ],
+        group: 'payments',
+        groupURI: 'https://www.w3.org/community/webpayments/',
+        groupPublicList: 'public-webpayments',
+        processVersion: 2023,
         edDraftURI: 'https://solidpayorg.github.io/webledgers/det-v1',
+        latestVersion: 'https://solidpayorg.github.io/webledgers/det-v1',
+        thisVersion: 'https://solidpayorg.github.io/webledgers/det-v1',
+        shortName: 'webledgers-det-v1',
+        issueBase: 'https://github.com/solidpayorg/webledgers/issues/',
         github: 'https://github.com/solidpayorg/webledgers/',
-        license: 'w3c-software-doc'
+        license: 'w3c-software-doc',
+        specStatus: 'unofficial'
       };
     </script>
     <style>
@@ -32,7 +48,7 @@
     <section id="abstract">
       <p>
         This extension standardises <strong>deterministic Bitcoin deposit addresses</strong> for any
-        <a href="#">Web Ledgers</a> instance whose owner is identified by a Nostr public key. A single
+        <a href="https://solidpayorg.github.io/webledgers/">Web Ledgers</a> instance whose owner is identified by a Nostr public key. A single
         compressed public key (<code>depositKey</code>) is published at the ledger root; every URI in the ledger
         deterministically maps—via a Taproot key‑tweak—to a unique Bitcoin address that only the owner can spend.
       </p>
@@ -41,7 +57,31 @@
     <section id="sotd">
       <p>
         This document is an informal draft being discussed in the
-        <a href="https://www.w3.org/community/webpayments/">W3C Web Payments Community Group</a> and is not on the W3C Standards Track.
+        <a href="https://www.w3.org/community/webpayments/">W3C Web Payments Community Group</a>. It is not a W3C Standard nor is it on the W3C Standards Track.
+      </p>
+      <p>
+        This is a living document that may be updated, replaced, or obsoleted by
+        other documents at any time. It is inappropriate to cite this document
+        as other than work in progress.
+      </p>
+      <p>
+        Comments and feedback on this specification are welcome and should be
+        directed to the
+        <a href="https://github.com/solidpayorg/webledgers/issues/">GitHub issues</a>
+        for this specification.
+      </p>
+    </section>
+
+    <section id="conformance">
+      <p>
+        As well as sections marked as non-normative, all authoring guidelines,
+        diagrams, examples, and notes in this specification are non-normative.
+        Everything else in this specification is normative.
+      </p>
+      <p>
+        The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+        "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+        document are to be interpreted as described in [[RFC2119]].
       </p>
     </section>
 
@@ -56,11 +96,11 @@
     <section>
       <h2>Terminology</h2>
       <dl class="termlist">
-        <dt><dfn>Owner&nbsp;Key (<code>P</code>)</dfn></dt>
+        <dt><dfn class="export">Owner&nbsp;Key (<code>P</code>)</dfn></dt>
         <dd>The 33‑byte compressed secp256k1 public key published in <code>depositKey</code>.</dd>
-        <dt><dfn>Target&nbsp;Identifier (<code>I</code>)</dfn></dt>
+        <dt><dfn class="export">Target&nbsp;Identifier (<code>I</code>)</dfn></dt>
         <dd>A URI contained in an Entry’s <code>url</code> field.</dd>
-        <dt><dfn>Tagged&nbsp;Hash</dfn></dt>
+        <dt><dfn class="export">Tagged&nbsp;Hash</dfn></dt>
         <dd>
           SHA‑256 construction <code>H(tag, m) = SHA256(SHA256(tag)‖SHA256(tag)‖m)</code> as used by BIP‑340.
         </dd>
