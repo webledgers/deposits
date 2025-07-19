@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Deterministic Deposit Extension for Web Ledgers (nostr-det-v1)</title>
+    <!-- ReSpec configuration -->
+    <script src="https://www.w3.org/Tools/respec/respec-w3c" class="remove"></script>
+    <script class="remove">
+      var respecConfig = {
+        specStatus: 'CG-DRAFT',
+        shortName: 'webledgers-det-v1',
+        editors: [
+          {
+            name: 'Melvin Carvalho',
+            url: 'https://melvincarvalho.com/#me',
+            company: 'Independent',
+            companyURL: 'https://melvincarvalho.com/#me'
+          }
+        ],
+        publishDate: '2025-07-20',
+        edDraftURI: 'https://solidpayorg.github.io/webledgers/det-v1',
+        github: 'https://github.com/solidpayorg/webledgers/',
+        license: 'w3c-software-doc'
+      };
+    </script>
+    <style>
+      pre .highlight { font-weight: bold; color: green; }
+      pre .comment { color: SteelBlue; user-select: none; }
+    </style>
+  </head>
+  <body>
+    <section id="abstract">
+      <p>
+        This extension standardises <strong>deterministic Bitcoin deposit addresses</strong> for any
+        <a href="#">Web Ledgers</a> instance whose owner is identified by a Nostr public key. A single
+        compressed public key (<code>depositKey</code>) is published at the ledger root; every URI in the ledger
+        deterministically maps—via a Taproot key‑tweak—to a unique Bitcoin address that only the owner can spend.
+      </p>
+    </section>
+
+    <section id="sotd">
+      <p>
+        This document is an informal draft being discussed in the
+        <a href="https://www.w3.org/community/webpayments/">W3C Web Payments Community Group</a> and is not on the W3C Standards Track.
+      </p>
+    </section>
+
+    <section>
+      <h2>Scope and Purpose</h2>
+      <p>
+        The goal is to enable <em>stateless</em> deposit address generation—anyone who can read the ledger JSON can pay
+        an entry without prior coordination or server API calls, while privacy is preserved by a fresh Taproot output per URI.
+      </p>
+    </section>
+
+    <section>
+      <h2>Terminology</h2>
+      <dl class="termlist">
+        <dt><dfn>Owner&nbsp;Key (<code>P</code>)</dfn></dt>
+        <dd>The 33‑byte compressed secp256k1 public key published in <code>depositKey</code>.</dd>
+        <dt><dfn>Target&nbsp;Identifier (<code>I</code>)</dfn></dt>
+        <dd>A URI contained in an Entry’s <code>url</code> field.</dd>
+        <dt><dfn>Tagged&nbsp;Hash</dfn></dt>
+        <dd>
+          SHA‑256 construction <code>H(tag, m) = SHA256(SHA256(tag)‖SHA256(tag)‖m)</code> as used by BIP‑340.
+        </dd>
+      </dl>
+    </section>
+
+    <section>
+      <h2>Data‑Model Additions</h2>
+      <p>A ledger supporting deterministic deposits <strong>MUST</strong> contain:</p>
+      <pre class="example highlight" title="Root object additions">
+{
+  "depositProtocol": "nostr-det-v1-taproot",
+  "depositKey": "02c1...9f"
+}
+      </pre>
+    </section>
+
+    <section>
+      <h2>Address‑Derivation Algorithm</h2>
+      <ol>
+        <li><strong>Canonicalise&nbsp;I:</strong> lower‑case scheme/host, strip default ports and trailing slashes, punycode host.</li>
+        <li><strong>Compute tweak t:</strong> <code>t := H("webledgers-deposit", I) mod n</code>. If <code>t = 0</code>, append a null byte to <code>I</code> and retry.</li>
+        <li><strong>Add t to P:</strong> <code>Q := P + t·G</code>.</li>
+        <li><strong>Encode Q:</strong> use BIP‑350 Bech32m as a P2TR (witness v1) address.</li>
+      </ol>
+      <p>The resulting address <code>A(I)</code> is the sole valid deposit address for <code>I</code>.</p>
+    </section>
+
+    <section>
+      <h2>Security Considerations</h2>
+      <ul>
+        <li><strong>Key exposure:</strong> leaking the private key compromises all deposits; operators SHOULD use HSMs.</li>
+        <li><strong>Privacy:</strong> on‑chain linkability is minimised; however the public ledger itself reveals the mapping <code>I → A(I)</code>.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Example</h2>
+      <pre class="example highlight" title="Complete ledger snippet">
+{
+  "@context": "https://w3id.org/webledgers",
+  "type": "WebLedger",
+  "depositProtocol": "nostr-det-v1-taproot",
+  "depositKey": "030f...9f",
+  "entries": [
+    { "type": "Entry", "url": "did:nostr:d17e...", "amount": "210000" }
+  ]
+}
+      </pre>
+    </section>
+
+    <section>
+      <h2>Reference Implementation</h2>
+      <p>An MIT‑licensed Python demo lives at <a href="https://github.com/solidpayorg/webledgers-detref">solidpayorg/webledgers-detref</a>.</p>
+    </section>
+
+    <section>
+      <h2>Future Work</h2>
+      <ul>
+        <li>MuSig2 multi‑owner ledgers.</li>
+        <li>Lightning‑aware tweaks embedding invoice secrets.</li>
+        <li>BIP‑322 receipts for proof‑of‑payment.</li>
+      </ul>
+    </section>
+  </body>
+</html>
